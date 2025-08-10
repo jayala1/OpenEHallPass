@@ -1,0 +1,25 @@
+{% extends "_base.html" %}
+{% block content %}
+{% if kiosk_banner %}
+<div class="alert alert-info py-2">{{ kiosk_banner }}</div>
+{% endif %}
+<h4 class="mb-3">Kiosk (Read-only)</h4>
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Destination</th>
+        <th>Issued</th>
+        <th>Expires</th>
+        <th>Time Left</th>
+        <th>Staff</th>
+      </tr>
+    </thead>
+    <tbody id="kioskBody">
+      <!-- populated via JS -->
+    </tbody>
+  </table>
+</div>
+<div class="text-muted small">Auto-refreshes every 10 seconds.</div>
+{% endblock %}

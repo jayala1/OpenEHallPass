@@ -1,0 +1,53 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Admin</h4>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card text-bg-light">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold">Users</div>
+            <div class="display-6">{{ users|length if users is defined else '-' }}</div>
+          </div>
+          <a class="btn btn-primary" href="{{ url_for('admin.users') }}">Manage</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-light">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold">Destinations</div>
+            <div class="display-6">{{ destinations|length if destinations is defined else '-' }}</div>
+          </div>
+          <a class="btn btn-primary" href="{{ url_for('admin.destinations') }}">Manage</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-light">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold">Active Passes</div>
+            <div class="display-6">{{ active_passes }}</div>
+          </div>
+          <a class="btn btn-primary" href="{{ url_for('passes.index') }}">View Passes</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+<div class="d-flex gap-2">
+  <a class="btn btn-outline-secondary" href="{{ url_for('admin.logs') }}">Logs</a>
+  <a class="btn btn-outline-secondary" href="{{ url_for('admin.metrics') }}">Metrics</a>
+  <a class="btn btn-outline-secondary" href="{{ url_for('admin.settings') }}">Settings</a>
+</div>
+{% endblock %}

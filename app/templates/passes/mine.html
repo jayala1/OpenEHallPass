@@ -1,0 +1,65 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">My Passes</h4>
+
+<div class="d-flex gap-2 mb-3">
+  <a class="btn btn-primary" href="{{ url_for('passes.request_pass') }}">Request New Pass</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Destination</th>
+        <th>Issued</th>
+        <th>Expires</th>
+        <th>Status</th>
+        <th>Time Left</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in passes %}
+      <tr class="pass-row 
+        {% if p.state.value == 'Pending' %}pending{% elif p.state.value == 'Active' %}active{% elif p.state.value in ['Denied','Cancelled','Expired'] %}inactive{% endif %}"
+        {% if p.expires_at %}data-expires="{{ p.expires_at.isoformat() }}Z"{% endif %}>
+        <td>{{ p.destination.name }}</td>
+        <td>{{ p.issued_at or '-' }}</td>
+        <td>{{ p.expires_at or '-' }}</td>
+        <td>
+          {% if p.state.value == 'Active' %}
+            <span class="badge text-bg-info">Active</span>
+          {% elif p.state.value == 'Pending' %}
+            <span class="badge text-bg-secondary">Pending</span>
+          {% elif p.state.value == 'Denied' %}
+            <span class="badge text-bg-danger">Denied</span>
+          {% elif p.state.value == 'Cancelled' %}
+            <span class="badge text-bg-warning">Cancelled</span>
+          {% elif p.state.value == 'Expired' %}
+            <span class="badge text-bg-light text-dark">Expired</span>
+          {% else %}
+            <span class="badge text-bg-light text-dark">{{ p.state.value }}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if p.state.value == 'Active' %}
+            <span class="remaining" data-pass-id="{{ p.id }}">--:--</span>
+          {% else %}
+            <span class="text-muted">--</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if p.state.value == 'Active' %}
+          <form class="d-inline" method="post" action="{{ url_for('passes.cancel', pass_id=p.id) }}">
+            <button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="text-center text-muted">No passes yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

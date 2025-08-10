@@ -1,0 +1,124 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Classes</h4>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h6 class="card-title">Create Class Period</h6>
+    <form class="row g-2" method="post" action="{{ url_for('admin.periods_create') }}">
+      <div class="col-md-3">
+        <input name="name" class="form-control" placeholder="Name (e.g., Algebra 1 - P1)" required>
+      </div>
+      <div class="col-md-3">
+        <label class="visually-hidden" for="teacher_id">Teacher</label>
+        <select name="teacher_id" id="teacher_id" class="form-select" required>
+          <option value="">Teacher…</option>
+          {% for t in teachers %}
+            <option value="{{ t.id }}">{{ t.full_name }} ({{ t.email }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input name="start_time" class="form-control" placeholder="Start HH:MM">
+      </div>
+      <div class="col-md-2">
+        <input name="end_time" class="form-control" placeholder="End HH:MM">
+      </div>
+      <div class="col-md-2">
+        <input name="days_mask" class="form-control" placeholder="Days 1111100">
+      </div>
+      <div class="col-md-2">
+        <input name="room" class="form-control" placeholder="Room (opt)">
+      </div>
+      <div class="col-md-2">
+        <select name="is_active" class="form-select">
+          <option value="1" selected>Active</option>
+          <option value="0">Inactive</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h6 class="mb-0">Existing Periods</h6>
+  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.import_view') }}">Bulk Import</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Teacher</th>
+        <th>Room</th>
+        <th>Window</th>
+        <th>Days</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in periods %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.teacher.full_name }}</td>
+        <td>{{ p.room or '—' }}</td>
+        <td>{{ p.start_time or '--:--' }} - {{ p.end_time or '--:--' }}</td>
+        <td><code>{{ p.days_mask or '———' }}</code></td>
+        <td>
+          {% if p.is_active %}<span class="badge text-bg-success">Active</span>
+          {% else %}<span class="badge text-bg-secondary">Inactive</span>{% endif %}
+        </td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.period_enrollments', period_id=p.id) }}">Enrollments</a>
+          <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#editRow{{ p.id }}">Edit</button>
+        </td>
+      </tr>
+      <tr class="collapse" id="editRow{{ p.id }}">
+        <td colspan="7">
+          <form class="row g-2" method="post" action="{{ url_for('admin.periods_update', period_id=p.id) }}">
+            <div class="col-md-3">
+              <input name="name" class="form-control" value="{{ p.name }}" required>
+            </div>
+            <div class="col-md-3">
+              <select name="teacher_id" class="form-select">
+                {% for t in teachers %}
+                  <option value="{{ t.id }}" {% if t.id == p.teacher_id %}selected{% endif %}>{{ t.full_name }} ({{ t.email }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <input name="start_time" class="form-control" value="{{ p.start_time or '' }}" placeholder="Start HH:MM">
+            </div>
+            <div class="col-md-2">
+              <input name="end_time" class="form-control" value="{{ p.end_time or '' }}" placeholder="End HH:MM">
+            </div>
+            <div class="col-md-2">
+              <input name="days_mask" class="form-control" value="{{ p.days_mask or '' }}" placeholder="1111100">
+            </div>
+            <div class="col-md-2">
+              <input name="room" class="form-control" value="{{ p.room or '' }}" placeholder="Room (opt)">
+            </div>
+            <div class="col-md-2">
+              <select name="is_active" class="form-select">
+                <option value="1" {% if p.is_active %}selected{% endif %}>Active</option>
+                <option value="0" {% if not p.is_active %}selected{% endif %}>Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary w-100" type="submit">Save</button>
+            </div>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="text-center text-muted">No periods created.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

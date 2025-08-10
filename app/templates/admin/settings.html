@@ -1,0 +1,48 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Settings</h4>
+<form method="post" class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Kiosk Auto-Refresh (seconds)</label>
+        <input class="form-control" type="number" name="kiosk_auto_refresh_seconds" value="{{ settings.get('kiosk_auto_refresh_seconds', '10') }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Near Expiry Warning (seconds)</label>
+        <input class="form-control" type="number" name="near_expiry_seconds" value="{{ settings.get('near_expiry_seconds', '120') }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Kiosk Strict Binding</label>
+        <select class="form-select" name="kiosk_strict_binding">
+          {% set v = (settings.get('kiosk_strict_binding', 'true') or 'true') %}
+          <option value="true" {% if v == 'true' %}selected{% endif %}>True</option>
+          <option value="false" {% if v == 'false' %}selected{% endif %}>False</option>
+        </select>
+        <div class="form-text">If true, kiosk requests auto-assign to bound period/teacher with no manual override.</div>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Enforce Period Time Window</label>
+        <select class="form-select" name="enforce_period_time_window">
+          {% set v = (settings.get('enforce_period_time_window', 'false') or 'false') %}
+          <option value="true" {% if v == 'true' %}selected{% endif %}>True</option>
+          <option value="false" {% if v == 'false' %}selected{% endif %}>False</option>
+        </select>
+        <div class="form-text">If true, requests/approvals must be within period time window (by weekday/time).</div>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Allow Teacher Approval Outside Window</label>
+        <select class="form-select" name="allow_teacher_approval_outside_period">
+          {% set v = (settings.get('allow_teacher_approval_outside_period', 'true') or 'true') %}
+          <option value="true" {% if v == 'true' %}selected{% endif %}>True</option>
+          <option value="false" {% if v == 'false' %}selected{% endif %}>False</option>
+        </select>
+        <div class="form-text">If false and enforcement is on, approvals outside window are blocked.</div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer d-flex justify-content-end">
+    <button class="btn btn-primary" type="submit">Save</button>
+  </div>
+</form>
+{% endblock %}

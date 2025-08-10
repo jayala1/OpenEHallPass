@@ -1,0 +1,78 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Manage Users</h4>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <input class="form-control" type="text" name="q" value="{{ q }}" placeholder="Search name or email">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-primary" type="submit">Search</button>
+  </div>
+</form>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h6 class="card-title">Create User</h6>
+    <form class="row g-2" method="post" action="{{ url_for('admin.users_create') }}">
+      <div class="col-md-3">
+        <input name="full_name" class="form-control" placeholder="Full name" required>
+      </div>
+      <div class="col-md-3">
+        <input name="email" type="email" class="form-control" placeholder="Email" required>
+      </div>
+      <div class="col-md-2">
+        <select name="role_id" class="form-select" required>
+          <option value="">Role…</option>
+          {% for r in roles %}
+            <option value="{{ r.id }}">{{ r.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input name="password" type="password" class="form-control" placeholder="Password" required>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Create</button>
+      </div>
+    </form>
+    <div class="form-text">Admin sets an initial password here. Users can change it later when a change-password page is added.</div>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.full_name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role.name }}</td>
+        <td>
+          {% if u.is_active %}<span class="badge text-bg-success">Active</span>
+          {% else %}<span class="badge text-bg-secondary">Inactive</span>{% endif %}
+        </td>
+        <td class="text-end">
+          <div class="d-inline-flex gap-1">
+            <form method="post" action="{{ url_for('admin.users_toggle', user_id=u.id) }}">
+              <button class="btn btn-sm {% if u.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" type="submit">
+                {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+              </button>
+            </form>
+            <form class="d-inline-flex gap-1" method="post" action="{{ url_for('admin.users_reset_password', user_id=u.id) }}">
+              <input name="new_password" type="password" class="form-control form-control-sm" placeholder="New password" required style="width: 140px;">
+              <button class="btn btn-sm btn-outline-primary" type="submit">Reset</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

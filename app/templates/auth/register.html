@@ -1,0 +1,42 @@
+{% extends "_base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Register (Demo)</h5>
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Full name</label>
+              <input name="full_name" type="text" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input name="email" type="email" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Password</label>
+              <input name="password" type="password" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Role</label>
+              <select name="role" class="form-select">
+                <option>Student</option>
+                <option>Teacher</option>
+                <option>Admin</option>
+              </select>
+              <div class="form-text">In production, Admins create users. This is for demo convenience.</div>
+            </div>
+          </div>
+          <div class="mt-3 d-flex justify-content-between">
+            <a class="btn btn-outline-secondary" href="{{ url_for('auth.login') }}">Back to login</a>
+            <button class="btn btn-primary" type="submit">Create account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

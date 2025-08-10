@@ -1,0 +1,50 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Destinations</h4>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h6 class="card-title">Create Destination</h6>
+    <form class="row g-2" method="post" action="{{ url_for('admin.destinations_create') }}">
+      <div class="col-md-4">
+        <input name="name" class="form-control" placeholder="Name (e.g., Restroom)" required>
+      </div>
+      <div class="col-md-3">
+        <input name="default_minutes" type="number" class="form-control" placeholder="Default minutes" value="5" min="1">
+      </div>
+      <div class="col-md-3">
+        <input name="max_concurrent" type="number" class="form-control" placeholder="Max concurrent (-1 unlimited)" value="-1">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Name</th><th>Default Minutes</th><th>Max Concurrent</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in destinations %}
+      <tr>
+        <td>{{ d.name }}</td>
+        <td>{{ d.default_minutes }}</td>
+        <td>{{ d.max_concurrent }}</td>
+        <td class="text-end">
+          <form class="d-inline-flex gap-2" method="post" action="{{ url_for('admin.destinations_update', dest_id=d.id) }}">
+            <input name="default_minutes" type="number" class="form-control form-control-sm" value="{{ d.default_minutes }}" style="width:120px">
+            <input name="max_concurrent" type="number" class="form-control form-control-sm" value="{{ d.max_concurrent }}" style="width:160px">
+            <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

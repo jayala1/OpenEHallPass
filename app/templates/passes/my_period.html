@@ -1,0 +1,136 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">My Period</h4>
+
+<form class="d-flex align-items-center gap-2 mb-3" method="get" action="{{ url_for('passes.my_period') }}">
+  <label class="form-label mb-0">Filter by period:</label>
+  <select class="form-select" name="period_id" style="max-width: 320px">
+    <option value="">All</option>
+    {% for p in teacher_periods %}
+      <option value="{{ p.id }}" {% if selected_period and selected_period.id == p.id %}selected{% endif %}>{{ p.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-outline-primary" type="submit">Apply</button>
+</form>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <div class="h6 mb-0">Pending</div>
+  <div class="d-flex align-items-center gap-2">
+    <span class="badge text-bg-info" id="pendingBadge">{{ pending|length }}</span>
+    <form method="post" action="{{ url_for('passes.my_period_approve_all') }}">
+      {% if selected_period %}<input type="hidden" name="period_id" value="{{ selected_period.id }}">{% endif %}
+      <button class="btn btn-sm btn-success" type="submit">Approve All</button>
+    </form>
+  </div>
+</div>
+
+<form method="post" action="{{ url_for('passes.my_period_deny_selected') }}" class="card mb-4">
+  <div class="card-body">
+    {% if pending %}
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th style="width:36px"></th>
+            <th>Student</th>
+            <th>Destination</th>
+            <th>Requested</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for p in pending %}
+          <tr>
+            <td><input class="form-check-input" type="checkbox" name="pass_ids" value="{{ p.id }}"></td>
+            <td>{{ p.student.full_name }}</td>
+            <td>{{ p.destination.name }}</td>
+            <td>{{ p.id }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-outline-danger btn-sm" type="submit">Deny Selected</button>
+    </div>
+    {% else %}
+      <div class="text-muted">No pending passes.</div>
+    {% endif %}
+  </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <div class="h6 mb-0">Active</div>
+</div>
+
+<form method="post" action="{{ url_for('passes.my_period_cancel_selected') }}" class="card mb-3">
+  <div class="card-body">
+    {% if active %}
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th style="width:36px"></th>
+            <th>Student</th>
+            <th>Destination</th>
+            <th>Issued</th>
+            <th>Expires</th>
+            <th>Time Left</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for p in active %}
+          <tr class="pass-row" data-expires="{{ p.expires_at.isoformat() + 'Z' if p.expires_at }}">
+            <td><input class="form-check-input" type="checkbox" name="pass_ids" value="{{ p.id }}"></td>
+            <td>{{ p.student.full_name }}</td>
+            <td>{{ p.destination.name }}</td>
+            <td>{{ p.issued_at }}</td>
+            <td>{{ p.expires_at }}</td>
+            <td><span class="remaining">--:--</span></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <label class="form-label mb-0">Override selected by (minutes):</label>
+        <input class="form-control form-control-sm" type="number" name="add_minutes" min="1" style="width:100px">
+        <input class="form-control form-control-sm" type="text" name="reason" placeholder="Reason (optional)" style="width:240px">
+        <button formaction="{{ url_for('passes.my_period_override_selected') }}" class="btn btn-outline-warning btn-sm" type="submit">Override Selected</button>
+      </div>
+      <div>
+        <button class="btn btn-outline-danger btn-sm" type="submit">Cancel Selected</button>
+      </div>
+    </div>
+    {% else %}
+      <div class="text-muted">No active passes.</div>
+    {% endif %}
+  </div>
+</form>
+
+<script>
+  // Simple polling for pending count on this page
+  (function() {
+    const badge = document.getElementById('pendingBadge');
+    let lastCount = badge ? parseInt(badge.textContent || '0', 10) : 0;
+    function poll() {
+      fetch("{{ url_for('passes.my_period_stats') }}")
+        .then(r => r.json())
+        .then(data => {
+          if (!badge) return;
+          const n = data.pending_count || 0;
+          badge.textContent = n;
+          if (n > lastCount) {
+            try {
+              const audio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAAAABAQAA'); // tiny silent blob (placeholder)
+              audio.play().catch(()=>{});
+            } catch (e) {}
+          }
+          lastCount = n;
+        })
+        .catch(() => {});
+    }
+    setInterval(poll, 10000);
+  })();
+</script>
+{% endblock %}

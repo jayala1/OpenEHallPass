@@ -1,0 +1,79 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Active Passes</h4>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Destination</th>
+        <th>Issued</th>
+        <th>Expires</th>
+        <th>Time Left</th>
+        <th>Staff</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in passes %}
+      <tr class="pass-row 
+        {% if p.state.value == 'Pending' %}pending{% elif p.state.value == 'Active' %}active{% elif p.state.value in ['Denied','Cancelled'] %}inactive{% endif %}"
+        {% if p.expires_at %}data-expires="{{ p.expires_at.isoformat() }}Z"{% endif %}>
+        <td>{{ p.student.full_name }}</td>
+        <td>{{ p.destination.name }}</td>
+        <td>{{ p.issued_at or '-' }}</td>
+        <td>{{ p.expires_at or '-' }}</td>
+        <td>
+          {% if p.state.value == 'Active' %}
+            <span class="remaining" data-pass-id="{{ p.id }}">--:--</span>
+          {% elif p.state.value == 'Pending' %}
+            <span class="badge text-bg-secondary">Pending</span>
+          {% elif p.state.value == 'Denied' %}
+            <span class="badge text-bg-danger">Denied</span>
+          {% elif p.state.value == 'Cancelled' %}
+            <span class="badge text-bg-warning">Cancelled</span>
+          {% else %}
+            <span class="text-muted">--</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if p.assignments %}
+            {% set names = [] %}
+            {% for a in p.assignments %}
+              {% if a.teacher and a.teacher.full_name %}
+                {% set _ = names.append(a.teacher.full_name) %}
+              {% endif %}
+            {% endfor %}
+            {{ names | join(", ") }}
+          {% endif %}
+        </td>
+        <td class="text-nowrap">
+          {% if p.state.value == 'Pending' %}
+            <form class="d-inline" method="post" action="{{ url_for('passes.approve', pass_id=p.id) }}">
+              <button class="btn btn-sm btn-success" type="submit">Approve</button>
+            </form>
+            <form class="d-inline" method="post" action="{{ url_for('passes.deny', pass_id=p.id) }}">
+              <button class="btn btn-sm btn-danger" type="submit">Deny</button>
+            </form>
+          {% elif p.state.value == 'Active' %}
+            <form class="d-inline" method="post" action="{{ url_for('passes.cancel', pass_id=p.id) }}">
+              <button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button>
+            </form>
+            <form class="d-inline-flex gap-1" method="post" action="{{ url_for('passes.override', pass_id=p.id) }}">
+              <input class="form-control form-control-sm" type="number" name="add_minutes" placeholder="+min" style="width:80px" min="1">
+              <input class="form-control form-control-sm" type="text" name="reason" placeholder="Reason" style="width:160px">
+              <button class="btn btn-sm btn-outline-warning" type="submit">Override</button>
+            </form>
+          {% else %}
+            <span class="text-muted">--</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="text-center text-muted">No active passes.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

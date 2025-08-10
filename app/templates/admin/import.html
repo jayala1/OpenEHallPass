@@ -1,0 +1,91 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Bulk Import</h4>
+
+<div class="alert alert-info">
+  Upload CSV files to create/update Class Periods and Student Enrollments.<br>
+  Periods CSV headers: <code>name,teacher_email,start_time,end_time,days_mask,is_active</code><br>
+  Enrollments CSV headers: <code>class_period_name,student_email,is_active</code>
+</div>
+
+<form class="card mb-4" method="post" action="{{ url_for('admin.import_dry_run') }}" enctype="multipart/form-data">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Periods CSV</label>
+        <input class="form-control" type="file" name="periods_csv" accept=".csv">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Enrollments CSV</label>
+        <input class="form-control" type="file" name="enrollments_csv" accept=".csv">
+      </div>
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="assume_create_users" name="assume_create_users" disabled>
+          <label class="form-check-label" for="assume_create_users">
+            Automatically create missing users (disabled in demo; add users manually in Admin > Users)
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <button class="btn btn-outline-primary" type="submit">Dry Run</button>
+  </div>
+</form>
+
+{% if report %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h6 class="card-title">Dry Run Results</h6>
+    <div class="row">
+      <div class="col-md-6">
+        <h6>Periods</h6>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">Create: {{ report.periods.create|length }}</li>
+          <li class="list-group-item">Update: {{ report.periods.update|length }}</li>
+          <li class="list-group-item">Errors: {{ report.periods.errors|length }}</li>
+        </ul>
+        {% if report.periods.errors %}
+        <div class="mt-2">
+          <div class="small text-muted">Errors:</div>
+          <ul>
+            {% for e in report.periods.errors %}
+              <li><code>{{ e }}</code></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <h6>Enrollments</h6>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">Create: {{ report.enrollments.create|length }}</li>
+          <li class="list-group-item">Update: {{ report.enrollments.update|length }}</li>
+          <li class="list-group-item">Errors: {{ report.enrollments.errors|length }}</li>
+        </ul>
+        {% if report.enrollments.errors %}
+        <div class="mt-2">
+          <div class="small text-muted">Errors:</div>
+          <ul>
+            {% for e in report.enrollments.errors %}
+              <li><code>{{ e }}</code></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="card-footer d-flex justify-content-end">
+    <form method="post" action="{{ url_for('admin.import_execute') }}" enctype="multipart/form-data">
+      <input type="hidden" name="periods_payload" value="{{ report.periods_payload }}">
+      <input type="hidden" name="enrollments_payload" value="{{ report.enrollments_payload }}">
+      <button class="btn btn-primary" type="submit" {% if (report.periods.errors|length + report.enrollments.errors|length) > 0 %}disabled{% endif %}>
+        Execute Import
+      </button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

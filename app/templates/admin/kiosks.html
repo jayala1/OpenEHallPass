@@ -1,0 +1,121 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Kiosks</h4>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h6 class="card-title">Create Kiosk</h6>
+    <form class="row g-2" method="post" action="{{ url_for('admin.kiosks_create') }}">
+      <div class="col-md-3">
+        <input class="form-control" name="name" placeholder="Name (e.g., Room 101 Kiosk)" required>
+      </div>
+      <div class="col-md-2">
+        <input class="form-control" name="room" placeholder="Room (e.g., 101)">
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" name="class_period_id">
+          <option value="">Bind to Class Period…</option>
+          {% for p in periods %}
+            <option value="{{ p.id }}">{{ p.name }} ({{ p.teacher.full_name }})</option>
+          {% endfor %}
+        </select>
+        <div class="form-text">Preferred binding. If set, teacher binding is ignored.</div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" name="teacher_id">
+          <option value="">Or bind to Teacher…</option>
+          {% for t in teachers %}
+            <option value="{{ t.id }}">{{ t.full_name }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text">Used only if no class period is chosen.</div>
+      </div>
+      <div class="col-md-1">
+        <button class="btn btn-primary w-100" type="submit">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Room</th>
+        <th>Token</th>
+        <th>Binding</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for k in kiosks %}
+      <tr>
+        <td>{{ k.name }}</td>
+        <td>{{ k.room or '-' }}</td>
+        <td>
+          <code>{{ k.token }}</code>
+          <div class="small text-muted">Link: /kiosk?token={{ k.token }}</div>
+        </td>
+        <td>
+          {% if k.class_period %}
+            <span class="badge text-bg-info">Class</span>
+            {{ k.class_period.name }} — {{ k.class_period.teacher.full_name }}
+          {% elif k.teacher %}
+            <span class="badge text-bg-secondary">Teacher</span>
+            {{ k.teacher.full_name }}
+          {% else %}
+            <span class="text-muted">None</span>
+          {% endif %}
+          <form class="row row-cols-lg-auto g-2 align-items-center mt-2" method="post" action="{{ url_for('admin.kiosks_bind', kiosk_id=k.id) }}">
+            <div class="col-12">
+              <select class="form-select form-select-sm" name="class_period_id">
+                <option value="">Class Period…</option>
+                {% for p in periods %}
+                  <option value="{{ p.id }}" {% if k.class_period and k.class_period.id == p.id %}selected{% endif %}>
+                    {{ p.name }} ({{ p.teacher.full_name }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <select class="form-select form-select-sm" name="teacher_id">
+                <option value="">Teacher…</option>
+                {% for t in teachers %}
+                  <option value="{{ t.id }}" {% if k.teacher and k.teacher.id == t.id %}selected{% endif %}>
+                    {{ t.full_name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-sm btn-outline-primary" type="submit">Bind</button>
+            </div>
+          </form>
+        </td>
+        <td>
+          {% if k.is_active %}
+            <span class="badge text-bg-success">Active</span>
+          {% else %}
+            <span class="badge text-bg-secondary">Inactive</span>
+          {% endif %}
+        </td>
+        <td class="text-end">
+          <form class="d-inline" method="post" action="{{ url_for('admin.kiosks_toggle', kiosk_id=k.id) }}">
+            <button class="btn btn-sm {% if k.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" type="submit">
+              {% if k.is_active %}Deactivate{% else %}Activate{% endif %}
+            </button>
+          </form>
+          <form class="d-inline" method="post" action="{{ url_for('admin.kiosks_rotate', kiosk_id=k.id) }}">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Rotate Token</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="text-center text-muted">No kiosks yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

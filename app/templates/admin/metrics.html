@@ -1,0 +1,87 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Metrics</h4>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="card-title">Top Destinations (by pass count)</h6>
+        {% if dest_counts %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr><th>Destination</th><th class="text-end">Passes</th></tr>
+            </thead>
+            <tbody>
+              {% for name, count in dest_counts %}
+              <tr>
+                <td>{{ name or '—' }}</td>
+                <td class="text-end"><span class="badge text-bg-light">{{ count }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="text-muted">No data yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="card-title">Frequent Students (by pass count)</h6>
+        {% if student_counts %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr><th>Student</th><th class="text-end">Passes</th></tr>
+            </thead>
+            <tbody>
+              {% for name, count in student_counts %}
+              <tr>
+                <td>{{ name or '—' }}</td>
+                <td class="text-end"><span class="badge text-bg-light">{{ count }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="text-muted">No data yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-title">Peak Times (by hour, 24h)</h6>
+        {% if hourly %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr><th>Hour</th><th class="text-end">Passes</th></tr>
+            </thead>
+            <tbody>
+              {% for hh, count in hourly %}
+              <tr>
+                <td>{{ hh }}</td>
+                <td class="text-end"><span class="badge text-bg-light">{{ count }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="text-muted">No data yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

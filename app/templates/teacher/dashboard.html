@@ -1,0 +1,53 @@
+{% extends "_base.html" %}
+{% block content %}
+<h4 class="mb-3">Teacher Dashboard</h4>
+
+<div class="card mb-3">
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <div>My recent passes</div>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('passes.index') }}">View all active</a>
+  </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 g-3">
+  {% for p in my_passes %}
+  <div class="col">
+    <div class="card pass-card" data-expires="{{ (p.expires_at.isoformat() + 'Z') if p.expires_at else '' }}">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="h5 mb-1">{{ p.student.full_name }}</div>
+            <div class="text-muted small">{{ p.destination.name }}</div>
+          </div>
+          <div class="text-end">
+            <div class="badge text-bg-info">{{ p.state.value }}</div>
+            <div class="small"><span class="remaining" data-pass-id="{{ p.id }}">--:--</span> left</div>
+          </div>
+        </div>
+        <div class="mt-2 d-flex gap-2">
+          {# Approve route is passes.approve and now exists; keep as-is. #}
+          <form method="post" action="{{ url_for('passes.approve', pass_id=p.id) }}">
+            <button class="btn btn-sm btn-outline-success" type="submit">Approve</button>
+          </form>
+          <form class="d-inline" method="post" action="{{ url_for('passes.deny', pass_id=p.id) }}">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Deny</button>
+          </form>
+          <form method="post" action="{{ url_for('passes.cancel', pass_id=p.id) }}">
+            <button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button>
+          </form>
+          <form class="d-inline-flex gap-1" method="post" action="{{ url_for('passes.override', pass_id=p.id) }}">
+            <input class="form-control form-control-sm" type="number" name="add_minutes" placeholder="+min" style="width:80px" min="1">
+            <input class="form-control form-control-sm" type="text" name="reason" placeholder="Reason" style="width:160px">
+            <button class="btn btn-sm btn-outline-warning" type="submit">Override</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col">
+    <div class="alert alert-info">No recent passes.</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

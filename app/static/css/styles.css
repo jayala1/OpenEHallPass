@@ -1,0 +1,42 @@
+/* Basic theming and utilities */
+:root {
+  --blink-red: #dc3545;
+}
+
+.blink-red {
+  animation: blink 1s step-start 0s infinite;
+}
+
+.flash-green {
+  animation: flashGreen 1s linear infinite;
+}
+.flash-red {
+  animation: flashRed 1s linear infinite;
+}
+@keyframes flashGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(25,135,84,.6); }
+  50% { box-shadow: 0 0 10px 4px rgba(25,135,84,.6); background: rgba(25,135,84,.1); }
+}
+@keyframes flashRed {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220,53,69,.6); }
+  50% { box-shadow: 0 0 10px 4px rgba(220,53,69,.6); background: rgba(220,53,69,.1); }
+}
+
+@keyframes blink {
+  50% { background-color: rgba(220, 53, 69, 0.15); }
+}
+
+/* Card spacing */
+.pass-card { border-left: 4px solid var(--bs-primary); }
+
+/* Table tweaks */
+table .remaining {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.pass-row.pending { opacity: 0.85; }
+.pass-row.active { }
+.pass-row.inactive { opacity: 0.6; }
+
+/* Make buttons within tables not wrap oddly */
+table td .btn { white-space: nowrap; }
